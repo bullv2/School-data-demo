@@ -22,7 +22,8 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   data,
   title,
 }) => {
-  const screenWidth = Dimensions.get('window').width - 32; // Padding on both sides
+  const { width } = Dimensions.get('window');
+  const chartWidth = width - 48; // 24px padding on each side
 
   const chartConfig = {
     backgroundColor: '#ffffff',
@@ -30,10 +31,27 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
     backgroundGradientTo: '#ffffff',
     decimalPlaces: 0,
     color: (opacity = 1) => `rgba(0, 100, 255, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
     style: {
       borderRadius: 16,
     },
+    propsForDots: {
+      r: '6',
+      strokeWidth: '2',
+      stroke: '#0a84ff',
+    },
+    propsForLabels: {
+      fontSize: 12,
+    },
   };
+
+  const pieColors = [
+    '#0a84ff', // Blue
+    '#30d158', // Green
+    '#ff453a', // Red
+    '#ff9f0a', // Orange
+    '#bf5af2', // Purple
+  ];
 
   return (
     <View style={styles.container}>
@@ -41,26 +59,35 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
       {type === 'line' ? (
         <LineChart
           data={data}
-          width={screenWidth}
+          width={chartWidth}
           height={220}
           chartConfig={chartConfig}
           bezier
           style={styles.chart}
+          withVerticalLines={false}
+          withHorizontalLines={false}
+          withDots={true}
+          withShadow={false}
+          withInnerLines={false}
+          withOuterLines={false}
         />
       ) : (
         <PieChart
           data={data.datasets[0].data.map((value, index) => ({
             name: data.legend?.[index] || `Item ${index + 1}`,
             value,
-            color: `hsl(${(index * 360) / data.datasets[0].data.length}, 70%, 50%)`,
+            color: pieColors[index % pieColors.length],
+            legendFontColor: '#7F7F7F',
+            legendFontSize: 12,
           }))}
-          width={screenWidth}
+          width={chartWidth}
           height={220}
           chartConfig={chartConfig}
           accessor="value"
           backgroundColor="transparent"
           paddingLeft="15"
           style={styles.chart}
+          absolute
         />
       )}
     </View>
@@ -69,7 +96,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 10,
+    marginVertical: 8,
     padding: 16,
     backgroundColor: '#ffffff',
     borderRadius: 16,
@@ -78,15 +105,16 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   title: {
     fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    fontWeight: '600',
+    marginBottom: 16,
     textAlign: 'center',
+    color: '#1c1c1e',
   },
   chart: {
     marginVertical: 8,
