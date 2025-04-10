@@ -207,4 +207,190 @@ export const mockParentData = {
       content: 'Due to inclement weather, the school will be closed tomorrow. All classes will resume on Monday.',
     },
   ]
+};
+
+// Student credentials for login
+export const mockStudentCredentials = [
+  { studentId: 'ST001', password: 'demo001' },
+  { studentId: 'ST002', password: 'demo002' },
+  { studentId: 'ST003', password: 'demo003' },
+];
+
+// Helper function to generate random scores
+const generateRandomScores = (min: number, max: number, count: number): number[] => {
+  return Array.from({ length: count }, () => 
+    Math.floor(Math.random() * (max - min + 1)) + min
+  );
+};
+
+// Student profiles with randomized data
+export const mockStudentProfiles = {
+  ST001: {
+    studentInfo: {
+      id: 'ST001',
+      name: 'Chan Tai Man',
+      class: '4A',
+      school: 'Demo Secondary School',
+      studentNumber: '2023001',
+      dateOfBirth: '2010-05-15',
+      gender: 'Male',
+      contact: {
+        email: 'taiman@demo.edu.hk',
+        phone: '+852 1234 5678'
+      }
+    },
+    academicData: {
+      currentTerm: 'Term 2',
+      subjects: {
+        Mathematics: {
+          scores: generateRandomScores(75, 95, 4),
+          teacher: 'Mr. Wong',
+          classAverage: generateRandomScores(70, 85, 4),
+          schoolAverage: generateRandomScores(65, 80, 4)
+        },
+        English: {
+          scores: generateRandomScores(70, 90, 4),
+          teacher: 'Ms. Lee',
+          classAverage: generateRandomScores(65, 85, 4),
+          schoolAverage: generateRandomScores(60, 80, 4)
+        },
+        Science: {
+          scores: generateRandomScores(80, 95, 4),
+          teacher: 'Mr. Chan',
+          classAverage: generateRandomScores(75, 90, 4),
+          schoolAverage: generateRandomScores(70, 85, 4)
+        },
+        Chinese: {
+          scores: generateRandomScores(75, 90, 4),
+          teacher: 'Ms. Cheung',
+          classAverage: generateRandomScores(70, 85, 4),
+          schoolAverage: generateRandomScores(65, 80, 4)
+        }
+      },
+      terms: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
+      overallPerformance: {
+        currentRank: 5,
+        previousRank: 7,
+        improvement: '+2',
+        totalStudents: 40
+      }
+    },
+    attendance: {
+      present: 95,
+      absent: 3,
+      late: 2
+    }
+  },
+  ST002: {
+    studentInfo: {
+      id: 'ST002',
+      name: 'Wong Siu Ming',
+      class: '4B',
+      school: 'Demo Secondary School',
+      studentNumber: '2023002',
+      dateOfBirth: '2010-08-22',
+      gender: 'Female',
+      contact: {
+        email: 'siuming@demo.edu.hk',
+        phone: '+852 2345 6789'
+      }
+    },
+    academicData: {
+      currentTerm: 'Term 2',
+      subjects: {
+        Mathematics: {
+          scores: generateRandomScores(80, 98, 4),
+          teacher: 'Mr. Wong',
+          classAverage: generateRandomScores(70, 85, 4),
+          schoolAverage: generateRandomScores(65, 80, 4)
+        },
+        English: {
+          scores: generateRandomScores(85, 95, 4),
+          teacher: 'Ms. Lee',
+          classAverage: generateRandomScores(65, 85, 4),
+          schoolAverage: generateRandomScores(60, 80, 4)
+        },
+        Science: {
+          scores: generateRandomScores(75, 90, 4),
+          teacher: 'Mr. Chan',
+          classAverage: generateRandomScores(75, 90, 4),
+          schoolAverage: generateRandomScores(70, 85, 4)
+        },
+        Chinese: {
+          scores: generateRandomScores(90, 98, 4),
+          teacher: 'Ms. Cheung',
+          classAverage: generateRandomScores(70, 85, 4),
+          schoolAverage: generateRandomScores(65, 80, 4)
+        }
+      },
+      terms: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
+      overallPerformance: {
+        currentRank: 2,
+        previousRank: 3,
+        improvement: '+1',
+        totalStudents: 40
+      }
+    },
+    attendance: {
+      present: 98,
+      absent: 1,
+      late: 1
+    }
+  },
+  ST003: {
+    studentInfo: {
+      id: 'ST003',
+      name: 'Lee Ka Ying',
+      class: '4A',
+      school: 'Demo Secondary School',
+      studentNumber: '2023003',
+      dateOfBirth: '2010-03-10',
+      gender: 'Female',
+      contact: {
+        email: 'kaying@demo.edu.hk',
+        phone: '+852 3456 7890'
+      }
+    },
+    academicData: {
+      currentTerm: 'Term 2',
+      subjects: {
+        Mathematics: {
+          scores: generateRandomScores(70, 85, 4),
+          teacher: 'Mr. Wong',
+          classAverage: generateRandomScores(70, 85, 4),
+          schoolAverage: generateRandomScores(65, 80, 4)
+        },
+        English: {
+          scores: generateRandomScores(75, 90, 4),
+          teacher: 'Ms. Lee',
+          classAverage: generateRandomScores(65, 85, 4),
+          schoolAverage: generateRandomScores(60, 80, 4)
+        },
+        Science: {
+          scores: generateRandomScores(65, 80, 4),
+          teacher: 'Mr. Chan',
+          classAverage: generateRandomScores(75, 90, 4),
+          schoolAverage: generateRandomScores(70, 85, 4)
+        },
+        Chinese: {
+          scores: generateRandomScores(80, 95, 4),
+          teacher: 'Ms. Cheung',
+          classAverage: generateRandomScores(70, 85, 4),
+          schoolAverage: generateRandomScores(65, 80, 4)
+        }
+      },
+      terms: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
+      overallPerformance: {
+        currentRank: 15,
+        previousRank: 18,
+        improvement: '+3',
+        totalStudents: 40
+      }
+    },
+    attendance: {
+      present: 92,
+      absent: 5,
+      late: 3
+    }
+  }
 }; 
