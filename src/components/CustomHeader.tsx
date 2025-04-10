@@ -4,19 +4,24 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NotificationPanel } from './NotificationPanel';
 import { mockParentData } from '../services/mockData';
+import { NotificationPosition } from '../navigation/types';
 
 interface CustomHeaderProps {
   onLogout: () => void;
   studentName: string;
   showNotifications: boolean;
   onToggleNotifications: () => void;
+  notificationButtonRef: React.RefObject<View>;
+  notificationPosition?: NotificationPosition;
 }
 
 export const CustomHeader: React.FC<CustomHeaderProps> = ({ 
   onLogout, 
   studentName,
   showNotifications,
-  onToggleNotifications
+  onToggleNotifications,
+  notificationButtonRef,
+  notificationPosition
 }) => {
   const insets = useSafeAreaInsets();
   
@@ -28,21 +33,23 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
       <View style={styles.content}>
         <View style={styles.leftSection}>
           <Text style={styles.greeting}>Welcome,</Text>
-          <Text style={styles.name}>{studentName}</Text>
+          <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{studentName}</Text>
         </View>
         <View style={styles.rightSection}>
-          <TouchableOpacity 
-            onPress={onToggleNotifications} 
-            style={styles.iconButton}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="notifications-outline" size={24} color="#007AFF" />
-            {unreadCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{unreadCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          <View ref={notificationButtonRef}>
+            <TouchableOpacity 
+              onPress={onToggleNotifications} 
+              style={styles.iconButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="notifications-outline" size={24} color="#007AFF" />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{unreadCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity 
             onPress={onLogout} 
             style={styles.iconButton}
@@ -56,6 +63,7 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
       <NotificationPanel
         visible={showNotifications}
         onClose={onToggleNotifications}
+        position={notificationPosition}
       />
     </View>
   );
@@ -66,7 +74,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5EA',
-    zIndex: 1,
+    zIndex: 100,
+    elevation: Platform.select({
+      android: 100,
+      default: 0
+    }),
+    minHeight: 64,
   },
   content: {
     flexDirection: 'row',
@@ -74,9 +87,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    height: 64,
   },
   leftSection: {
     flex: 1,
+    paddingRight: 16,
   },
   rightSection: {
     flexDirection: 'row',
@@ -91,6 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: '#000000',
+    flexShrink: 1,
   },
   iconButton: {
     padding: 8,

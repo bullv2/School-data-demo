@@ -7,25 +7,26 @@ interface ChartData {
   datasets: {
     data: number[];
     color?: (opacity: number) => string;
+    strokeWidth?: number;
   }[];
-  legend?: string[];
-  colors?: string[];
 }
 
 interface PerformanceChartProps {
   type: 'line' | 'pie' | 'bar';
   data: ChartData;
-  title: string;
+  title?: string;
+  overlay?: boolean;
 }
 
 export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   type,
   data,
   title,
+  overlay = false,
 }) => {
   const { width } = Dimensions.get('window');
-  const chartWidth = width - 64; // Increased padding
-  const chartHeight = 180; // Reduced height
+  const chartWidth = width - 80;
+  const chartHeight = 220;
 
   const chartConfig = {
     backgroundColor: '#ffffff',
@@ -34,20 +35,23 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
     decimalPlaces: 0,
     color: (opacity = 1) => data.datasets[0].color?.(opacity) || `rgba(0, 122, 255, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    strokeWidth: data.datasets[0].strokeWidth || 2,
     style: {
       borderRadius: 16,
     },
     propsForDots: {
-      r: '4',
-      strokeWidth: '2',
+      r: 4,
+      strokeWidth: 2,
       stroke: '#007AFF',
     },
     propsForLabels: {
-      fontSize: 10,
+      fontSize: 11,
+      fontWeight: '500',
     },
     barPercentage: 0.6,
     propsForBackgroundLines: {
       strokeWidth: 1,
+      strokeDasharray: [], // Solid lines
       stroke: 'rgba(0, 0, 0, 0.1)',
     },
   };
@@ -62,16 +66,19 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             height={chartHeight}
             chartConfig={chartConfig}
             bezier
-            style={styles.chart}
-            withVerticalLines={true}
-            withHorizontalLines={true}
-            withDots={true}
+            style={overlay ? {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+            } : styles.chart}
+            withInnerLines={!overlay}
+            withOuterLines={!overlay}
+            withVerticalLabels={!overlay}
+            withHorizontalLabels={!overlay}
+            withDots
             withShadow={false}
-            withInnerLines={true}
-            withOuterLines={true}
-            yAxisInterval={20}
+            transparent={true}
             segments={4}
-            fromZero
           />
         );
       case 'pie':
@@ -80,9 +87,9 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             data={data.datasets[0].data.map((value, index) => ({
               name: data.labels[index] || `Item ${index + 1}`,
               value,
-              color: data.colors?.[index] || data.datasets[0].color?.(1) || `rgba(0, 122, 255, 1)`,
+              color: (data as any).colors?.[index] || data.datasets[0].color?.(1) || `rgba(0, 122, 255, 1)`,
               legendFontColor: '#666',
-              legendFontSize: 11,
+              legendFontSize: 12,
             }))}
             width={chartWidth}
             height={chartHeight}
@@ -104,7 +111,8 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             yAxisSuffix=""
             chartConfig={{
               ...chartConfig,
-              barPercentage: 0.6,
+              fillShadowGradientFrom: 'rgba(0, 122, 255, 0.8)',
+              fillShadowGradientTo: 'rgba(0, 122, 255, 0.8)',
             }}
             style={styles.chart}
             showBarTops={false}
@@ -118,8 +126,16 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+    <View style={[
+      styles.container,
+      overlay && {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        backgroundColor: 'transparent',
+      }
+    ]}>
+      {!overlay && title && <Text style={styles.title}>{title}</Text>}
       <View style={styles.chartContainer}>
         {renderChart()}
       </View>
@@ -131,21 +147,21 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
-    padding: 16,
+    padding: 12,
     marginBottom: 16,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 16,
+    marginBottom: 12,
     color: '#000000',
   },
   chartContainer: {
     alignItems: 'center',
-    marginHorizontal: -8, // Reduced negative margin
+    paddingHorizontal: 4,
   },
   chart: {
-    marginVertical: 8,
+    marginVertical: 4,
     borderRadius: 16,
   },
 }); 

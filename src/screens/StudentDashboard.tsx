@@ -97,11 +97,19 @@ const StudentDashboard: React.FC = () => {
     datasets: [
       {
         data: subjectEntries.map(([_, subject]) => calculateSubjectAverage(subject.scores)),
-        color: () => 'rgba(0, 122, 255, 0.8)',
-      },
+        color: () => 'rgba(0, 122, 255, 0.8)', // Blue bars for student scores
+        strokeWidth: 0,
+      }
+    ],
+  };
+
+  const classAverageData = {
+    labels: Object.keys(subjects),
+    datasets: [
       {
         data: subjectEntries.map(([_, subject]) => calculateSubjectAverage(subject.classAverage)),
-        color: () => 'rgba(142, 142, 147, 0.8)',
+        color: () => 'rgba(255, 149, 0, 0.8)', // Orange line for class average
+        strokeWidth: 2,
       }
     ],
   };
@@ -116,9 +124,9 @@ const StudentDashboard: React.FC = () => {
       ],
     }],
     colors: [
-      'rgba(52, 199, 89, 1)',   // iOS green for Present
-      'rgba(255, 59, 48, 1)',   // iOS red for Absent
-      'rgba(255, 149, 0, 1)',   // iOS orange for Late
+      'rgba(52, 199, 89, 1)',    // Bright green for Present
+      'rgba(255, 69, 58, 1)',    // Bright red for Absent
+      'rgba(255, 159, 10, 1)',   // Bright orange for Late
     ],
   };
 
@@ -236,25 +244,33 @@ const StudentDashboard: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Subject Performance</Text>
         <View style={styles.card}>
-          <PerformanceChart
-            type="bar"
-            data={subjectPerformanceChartData}
-            title="Subject vs Class Average"
-          />
+          <Text style={styles.chartTitle}>Subject vs Class Average</Text>
+          <View style={styles.chartWrapper}>
+            <PerformanceChart
+              type="bar"
+              data={subjectPerformanceChartData}
+            />
+            <PerformanceChart
+              type="line"
+              data={classAverageData}
+              overlay={true}
+            />
+          </View>
           <View style={styles.legend}>
             <View style={styles.legendItem}>
               <View style={[styles.legendColor, { backgroundColor: 'rgba(0, 122, 255, 0.8)' }]} />
               <Text style={styles.legendText}>Your Average</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendColor, { backgroundColor: 'rgba(142, 142, 147, 0.8)' }]} />
+              <View style={[styles.legendColor, { backgroundColor: 'rgba(255, 149, 0, 0.8)' }]} />
               <Text style={styles.legendText}>Class Average</Text>
             </View>
           </View>
           <View style={styles.infoContainer}>
-            <Text style={styles.infoLabel}>
-              Best Subject: <Text style={styles.infoValue}>{analysis.bestSubject.name}</Text>
-            </Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Best Subject:</Text>
+              <Text style={styles.infoValue}>{analysis.bestSubject.name}</Text>
+            </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Class:</Text>
               <Text style={styles.infoValue}>{mockStudentData.studentInfo.class}</Text>
@@ -359,7 +375,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
-    padding: 16,
+    padding: 12,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
@@ -369,6 +385,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    overflow: 'hidden',
   },
   trend: {
     fontSize: 15,
@@ -492,22 +509,23 @@ const styles = StyleSheet.create({
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 16,
-    gap: 16,
+    alignItems: 'center',
+    marginBottom: 16,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginHorizontal: 8,
   },
   legendColor: {
     width: 12,
     height: 12,
     borderRadius: 6,
+    marginRight: 4,
   },
   legendText: {
     fontSize: 12,
-    color: '#666666',
+    color: '#666',
   },
   infoContainer: {
     marginTop: 16,
@@ -515,21 +533,55 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#E5E5EA',
   },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  infoLabel: {
+    fontSize: 15,
+    color: '#666',
+  },
+  infoValue: {
+    fontSize: 15,
+    color: '#000',
+    fontWeight: '500',
+  },
+  analysisContent: {
+    paddingTop: 12,
+  },
   subheading: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000000',
+    color: '#000',
     marginTop: 12,
     marginBottom: 8,
   },
   actionsList: {
-    paddingLeft: 4,
+    marginTop: 8,
   },
   actionItem: {
-    fontSize: 15,
-    color: '#48484A',
-    marginBottom: 6,
-    lineHeight: 20,
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  chartWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: -4,
+    overflow: 'hidden',
+    borderRadius: 16,
+    marginBottom: 16,
+    height: 220, // Fixed height for the chart container
   },
 });
 
