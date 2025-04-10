@@ -1,206 +1,140 @@
-import React, { useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  TouchableOpacity,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform, StatusBar, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-const WINDOW_HEIGHT = Dimensions.get('window').height;
-const PANEL_HEIGHT = WINDOW_HEIGHT * 0.7;
+import { mockParentData } from '../services/mockData';
 
 interface NotificationPanelProps {
-  isVisible: boolean;
+  visible: boolean;
   onClose: () => void;
 }
 
-// Mock data for notifications
-const mockNotifications = [
-  {
-    id: '1',
-    title: 'New Assignment Posted',
-    message: 'Math homework due next Friday',
-    time: '2 hours ago',
-    unread: true,
-  },
-  {
-    id: '2',
-    title: 'Grade Updated',
-    message: 'Your Physics test grade has been posted',
-    time: '5 hours ago',
-    unread: true,
-  },
-  {
-    id: '3',
-    title: 'Upcoming Test',
-    message: 'Chemistry test next Monday',
-    time: '1 day ago',
-    unread: false,
-  },
-];
-
-const NotificationPanel: React.FC<NotificationPanelProps> = ({ isVisible, onClose }) => {
-  const slideAnim = useRef(new Animated.Value(-PANEL_HEIGHT)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (isVisible) {
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0.5,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: -PANEL_HEIGHT,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [isVisible]);
-
-  if (!isVisible) return null;
+export const NotificationPanel: React.FC<NotificationPanelProps> = ({ visible, onClose }) => {
+  if (!visible) return null;
 
   return (
-    <View style={StyleSheet.absoluteFill}>
-      <Animated.View
-        style={[
-          styles.backdrop,
-          {
-            opacity: fadeAnim,
-          },
-        ]}
-      >
-        <TouchableOpacity
-          style={StyleSheet.absoluteFill}
-          onPress={onClose}
-          activeOpacity={1}
-        />
-      </Animated.View>
-      <Animated.View
-        style={[
-          styles.panel,
-          {
-            transform: [{ translateY: slideAnim }],
-          },
-        ]}
-      >
+    <View style={styles.overlay}>
+      <StatusBar barStyle="dark-content" />
+      <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Notifications</Text>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={24} color="#333" />
+          <Text style={styles.title}>Notifications</Text>
+          <TouchableOpacity 
+            onPress={onClose}
+            style={styles.closeButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="close" size={24} color="#000" />
           </TouchableOpacity>
         </View>
+        
         <ScrollView style={styles.content}>
-          {mockNotifications.map((notification) => (
-            <View key={notification.id} style={styles.notificationItem}>
-              <View style={styles.notificationContent}>
-                <View style={styles.notificationHeader}>
-                  <Text style={styles.notificationTitle}>{notification.title}</Text>
-                  {notification.unread && <View style={styles.unreadDot} />}
-                </View>
-                <Text style={styles.notificationMessage}>{notification.message}</Text>
-                <Text style={styles.notificationTime}>{notification.time}</Text>
+          {mockParentData.notifications.map((notification) => (
+            <TouchableOpacity 
+              key={notification.id} 
+              style={styles.notificationItem}
+              onPress={() => {
+                // Handle notification press
+                onClose();
+              }}
+            >
+              <View style={styles.notificationIcon}>
+                <Ionicons 
+                  name={notification.type === 'Academic' ? 'school' : 'calendar'} 
+                  size={24} 
+                  color="#007AFF" 
+                />
               </View>
-            </View>
+              <View style={styles.notificationContent}>
+                <Text style={styles.notificationTitle}>{notification.title}</Text>
+                <Text style={styles.notificationText}>{notification.type}</Text>
+                <Text style={styles.timeText}>{notification.date}</Text>
+              </View>
+              {!notification.read && <View style={styles.unreadDot} />}
+            </TouchableOpacity>
           ))}
         </ScrollView>
-      </Animated.View>
+      </SafeAreaView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000',
-  },
-  panel: {
+  overlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: PANEL_HEIGHT,
-    backgroundColor: '#fff',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 999999,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    backgroundColor: 'white',
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
+  title: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#000',
+  },
+  closeButton: {
+    padding: 8,
+    borderRadius: 20,
   },
   content: {
     flex: 1,
+    backgroundColor: 'white',
   },
   notificationItem: {
-    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
+  notificationIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F2F2F7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
   notificationContent: {
     flex: 1,
-  },
-  notificationHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 4,
+    marginRight: 10,
   },
   notificationTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
-    color: '#333',
+    color: '#000',
+    marginBottom: 4,
   },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#0a84ff',
-  },
-  notificationMessage: {
-    fontSize: 14,
+  notificationText: {
+    fontSize: 15,
     color: '#666',
     marginBottom: 4,
   },
-  notificationTime: {
-    fontSize: 12,
+  timeText: {
+    fontSize: 13,
     color: '#999',
   },
-});
-
-export default NotificationPanel; 
+  unreadDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#007AFF',
+    marginLeft: 8,
+  },
+}); 

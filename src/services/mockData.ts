@@ -7,6 +7,7 @@ export const mockStudentData = {
     studentNumber: '2023001',
     dateOfBirth: '2010-05-15',
     gender: 'Male',
+    profilePicture: 'https://i.pravatar.cc/300?img=12',
     contact: {
       email: 'student@demo.edu.hk',
       phone: '+852 1234 5678'
@@ -155,6 +156,7 @@ export const mockParentData = {
   parentInfo: {
     id: 'P001',
     name: 'Chan Siu Ming',
+    profilePicture: 'https://i.pravatar.cc/300?img=32',
     relationship: 'Father',
     contact: {
       phone: '+852 9876 5432',
@@ -234,6 +236,7 @@ export const mockStudentProfiles = {
       studentNumber: '2023001',
       dateOfBirth: '2010-05-15',
       gender: 'Male',
+      profilePicture: 'https://i.pravatar.cc/300?img=12',
       contact: {
         email: 'taiman@demo.edu.hk',
         phone: '+852 1234 5678'
@@ -290,6 +293,7 @@ export const mockStudentProfiles = {
       studentNumber: '2023002',
       dateOfBirth: '2010-08-22',
       gender: 'Female',
+      profilePicture: 'https://i.pravatar.cc/300?img=13',
       contact: {
         email: 'siuming@demo.edu.hk',
         phone: '+852 2345 6789'
@@ -346,6 +350,7 @@ export const mockStudentProfiles = {
       studentNumber: '2023003',
       dateOfBirth: '2010-03-10',
       gender: 'Female',
+      profilePicture: 'https://i.pravatar.cc/300?img=14',
       contact: {
         email: 'kaying@demo.edu.hk',
         phone: '+852 3456 7890'
@@ -393,4 +398,77 @@ export const mockStudentProfiles = {
       late: 3
     }
   }
+};
+
+export const mockUserProfile = {
+  name: 'Sarah Johnson',
+  grade: '10th Grade',
+  studentId: 'ST2024001',
+  email: 'sarah.j@school.edu',
+  avatar: 'https://i.pravatar.cc/300',
+  stats: {
+    attendance: '95%',
+    gpa: '3.8',
+    rank: '15/150',
+    activities: 5,
+  },
+  achievements: [
+    {
+      id: '1',
+      title: 'Honor Roll',
+      description: 'Achieved Honor Roll status for Fall 2023',
+      icon: 'trophy',
+    },
+    {
+      id: '2',
+      title: 'Perfect Attendance',
+      description: '100% attendance in Spring 2023',
+      icon: 'calendar-check',
+    },
+    {
+      id: '3',
+      title: 'Science Fair Winner',
+      description: 'First place in Regional Science Fair',
+      icon: 'ribbon',
+    },
+  ],
+  academicData: {
+    subjects: [
+      {
+        name: 'Mathematics',
+        scores: [85, 88, 92, 90],
+        average: 88.75,
+        classAverage: 82,
+      },
+      {
+        name: 'Science',
+        scores: [90, 92, 88, 94],
+        average: 91,
+        classAverage: 84,
+      },
+      {
+        name: 'English',
+        scores: [87, 89, 91, 88],
+        average: 88.75,
+        classAverage: 83,
+      },
+      {
+        name: 'History',
+        scores: [92, 90, 88, 94],
+        average: 91,
+        classAverage: 85,
+      },
+    ],
+    attendance: {
+      present: 95,
+      absent: 3,
+      late: 2,
+      total: 100,
+    },
+  },
+  studentInfo: {
+    className: '10-A',
+    homeroom: 'Room 203',
+    advisor: 'Mr. Anderson',
+  },
 }; 

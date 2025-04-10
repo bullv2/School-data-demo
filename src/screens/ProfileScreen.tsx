@@ -8,53 +8,21 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-// Mock user data
-const mockUserData = {
-  name: 'Sarah Johnson',
-  grade: '10th Grade',
-  studentId: 'ST2024001',
-  email: 'sarah.j@school.edu',
-  avatar: 'https://i.pravatar.cc/300',
-  stats: {
-    attendance: '95%',
-    gpa: '3.8',
-    rank: '15/150',
-    activities: 5,
-  },
-  achievements: [
-    {
-      id: '1',
-      title: 'Honor Roll',
-      description: 'Achieved Honor Roll status for Fall 2023',
-      icon: 'trophy',
-    },
-    {
-      id: '2',
-      title: 'Perfect Attendance',
-      description: '100% attendance in Spring 2023',
-      icon: 'calendar-check',
-    },
-    {
-      id: '3',
-      title: 'Science Fair Winner',
-      description: 'First place in Regional Science Fair',
-      icon: 'ribbon',
-    },
-  ],
-};
+import { mockStudentData } from '../services/mockData';
 
 const ProfileScreen = () => {
+  const { studentInfo, academicData, attendance, extracurricular, behavior } = mockStudentData;
+  
   return (
     <ScrollView style={styles.container}>
       {/* Profile Header */}
       <View style={styles.header}>
         <Image
-          source={{ uri: mockUserData.avatar }}
+          source={{ uri: studentInfo.profilePicture }}
           style={styles.avatar}
         />
-        <Text style={styles.name}>{mockUserData.name}</Text>
-        <Text style={styles.grade}>{mockUserData.grade}</Text>
+        <Text style={styles.name}>{studentInfo.name}</Text>
+        <Text style={styles.grade}>Class {studentInfo.class}</Text>
         <TouchableOpacity style={styles.editButton}>
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </TouchableOpacity>
@@ -67,12 +35,17 @@ const ProfileScreen = () => {
           <View style={styles.infoItem}>
             <Ionicons name="school" size={20} color="#666" />
             <Text style={styles.infoLabel}>Student ID</Text>
-            <Text style={styles.infoValue}>{mockUserData.studentId}</Text>
+            <Text style={styles.infoValue}>{studentInfo.studentNumber}</Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="mail" size={20} color="#666" />
             <Text style={styles.infoLabel}>Email</Text>
-            <Text style={styles.infoValue}>{mockUserData.email}</Text>
+            <Text style={styles.infoValue}>{studentInfo.contact.email}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Ionicons name="call" size={20} color="#666" />
+            <Text style={styles.infoLabel}>Phone</Text>
+            <Text style={styles.infoValue}>{studentInfo.contact.phone}</Text>
           </View>
         </View>
       </View>
@@ -82,19 +55,19 @@ const ProfileScreen = () => {
         <Text style={styles.sectionTitle}>Statistics</Text>
         <View style={styles.statsGrid}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{mockUserData.stats.attendance}</Text>
+            <Text style={styles.statValue}>{attendance.present}%</Text>
             <Text style={styles.statLabel}>Attendance</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{mockUserData.stats.gpa}</Text>
-            <Text style={styles.statLabel}>GPA</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{mockUserData.stats.rank}</Text>
+            <Text style={styles.statValue}>{academicData.overallPerformance.currentRank}</Text>
             <Text style={styles.statLabel}>Class Rank</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{mockUserData.stats.activities}</Text>
+            <Text style={styles.statValue}>{Object.keys(academicData.subjects).length}</Text>
+            <Text style={styles.statLabel}>Subjects</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{extracurricular.activities.length}</Text>
             <Text style={styles.statLabel}>Activities</Text>
           </View>
         </View>
@@ -103,15 +76,15 @@ const ProfileScreen = () => {
       {/* Achievements */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Achievements</Text>
-        {mockUserData.achievements.map((achievement) => (
-          <View key={achievement.id} style={styles.achievementItem}>
+        {behavior.awards.map((award, index) => (
+          <View key={index} style={styles.achievementItem}>
             <View style={styles.achievementIcon}>
-              <Ionicons name={achievement.icon as any} size={24} color="#4a90e2" />
+              <Ionicons name="trophy" size={24} color="#4a90e2" />
             </View>
             <View style={styles.achievementContent}>
-              <Text style={styles.achievementTitle}>{achievement.title}</Text>
+              <Text style={styles.achievementTitle}>{award.name}</Text>
               <Text style={styles.achievementDescription}>
-                {achievement.description}
+                Awarded on {new Date(award.date).toLocaleDateString()}
               </Text>
             </View>
           </View>
@@ -134,10 +107,20 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 16,
+    borderWidth: 3,
+    borderColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   name: {
     fontSize: 24,

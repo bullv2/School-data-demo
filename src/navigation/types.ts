@@ -1,13 +1,21 @@
 export type RootStackParamList = {
   Login: undefined;
   MainTabs: {
-    studentId?: string;
+    studentId: string;
   };
 };
 
 export type MainTabParamList = {
-  Dashboard: undefined;
-  Materials: undefined;
-  Profile: undefined;
-  Settings: undefined;
+  Dashboard: {
+    studentId: string;
+  };
+  Materials: {
+    studentId: string;
+  };
+  Profile: {
+    studentId: string;
+  };
+  Settings: {
+    studentId: string;
+  };
 }; 

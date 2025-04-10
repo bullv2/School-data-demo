@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Dimensions, Text, StyleSheet } from 'react-native';
-import { LineChart, PieChart } from 'react-native-chart-kit';
+import { View, Text, Dimensions, StyleSheet } from 'react-native';
+import { LineChart, PieChart, BarChart } from 'react-native-chart-kit';
 
 interface ChartData {
   labels: string[];
@@ -9,10 +9,11 @@ interface ChartData {
     color?: (opacity: number) => string;
   }[];
   legend?: string[];
+  colors?: string[];
 }
 
 interface PerformanceChartProps {
-  type: 'line' | 'pie';
+  type: 'line' | 'pie' | 'bar';
   data: ChartData;
   title: string;
 }
@@ -23,98 +24,125 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   title,
 }) => {
   const { width } = Dimensions.get('window');
-  const chartWidth = width - 48; // 24px padding on each side
+  const chartWidth = width - 64; // Increased padding
+  const chartHeight = 180; // Reduced height
 
   const chartConfig = {
     backgroundColor: '#ffffff',
     backgroundGradientFrom: '#ffffff',
     backgroundGradientTo: '#ffffff',
     decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(0, 100, 255, ${opacity})`,
+    color: (opacity = 1) => data.datasets[0].color?.(opacity) || `rgba(0, 122, 255, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
     style: {
       borderRadius: 16,
     },
     propsForDots: {
-      r: '6',
+      r: '4',
       strokeWidth: '2',
-      stroke: '#0a84ff',
+      stroke: '#007AFF',
     },
     propsForLabels: {
-      fontSize: 12,
+      fontSize: 10,
+    },
+    barPercentage: 0.6,
+    propsForBackgroundLines: {
+      strokeWidth: 1,
+      stroke: 'rgba(0, 0, 0, 0.1)',
     },
   };
 
-  const pieColors = [
-    '#0a84ff', // Blue
-    '#30d158', // Green
-    '#ff453a', // Red
-    '#ff9f0a', // Orange
-    '#bf5af2', // Purple
-  ];
+  const renderChart = () => {
+    switch (type) {
+      case 'line':
+        return (
+          <LineChart
+            data={data}
+            width={chartWidth}
+            height={chartHeight}
+            chartConfig={chartConfig}
+            bezier
+            style={styles.chart}
+            withVerticalLines={true}
+            withHorizontalLines={true}
+            withDots={true}
+            withShadow={false}
+            withInnerLines={true}
+            withOuterLines={true}
+            yAxisInterval={20}
+            segments={4}
+            fromZero
+          />
+        );
+      case 'pie':
+        return (
+          <PieChart
+            data={data.datasets[0].data.map((value, index) => ({
+              name: data.labels[index] || `Item ${index + 1}`,
+              value,
+              color: data.colors?.[index] || data.datasets[0].color?.(1) || `rgba(0, 122, 255, 1)`,
+              legendFontColor: '#666',
+              legendFontSize: 11,
+            }))}
+            width={chartWidth}
+            height={chartHeight}
+            chartConfig={chartConfig}
+            accessor="value"
+            backgroundColor="transparent"
+            paddingLeft="15"
+            style={styles.chart}
+            absolute
+          />
+        );
+      case 'bar':
+        return (
+          <BarChart
+            data={data}
+            width={chartWidth}
+            height={chartHeight}
+            yAxisLabel=""
+            yAxisSuffix=""
+            chartConfig={{
+              ...chartConfig,
+              barPercentage: 0.6,
+            }}
+            style={styles.chart}
+            showBarTops={false}
+            fromZero
+            withInnerLines={true}
+            segments={4}
+            flatColor={true}
+          />
+        );
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
-      {type === 'line' ? (
-        <LineChart
-          data={data}
-          width={chartWidth}
-          height={220}
-          chartConfig={chartConfig}
-          bezier
-          style={styles.chart}
-          withVerticalLines={false}
-          withHorizontalLines={false}
-          withDots={true}
-          withShadow={false}
-          withInnerLines={false}
-          withOuterLines={false}
-        />
-      ) : (
-        <PieChart
-          data={data.datasets[0].data.map((value, index) => ({
-            name: data.legend?.[index] || `Item ${index + 1}`,
-            value,
-            color: pieColors[index % pieColors.length],
-            legendFontColor: '#7F7F7F',
-            legendFontSize: 12,
-          }))}
-          width={chartWidth}
-          height={220}
-          chartConfig={chartConfig}
-          accessor="value"
-          backgroundColor="transparent"
-          paddingLeft="15"
-          style={styles.chart}
-          absolute
-        />
-      )}
+      <View style={styles.chartContainer}>
+        {renderChart()}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 8,
-    padding: 16,
     backgroundColor: '#ffffff',
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    padding: 16,
+    marginBottom: 16,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 16,
-    textAlign: 'center',
-    color: '#1c1c1e',
+    color: '#000000',
+  },
+  chartContainer: {
+    alignItems: 'center',
+    marginHorizontal: -8, // Reduced negative margin
   },
   chart: {
     marginVertical: 8,

@@ -1,43 +1,57 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import NotificationPanel from './NotificationPanel';
+import { NotificationPanel } from './NotificationPanel';
+import { mockParentData } from '../services/mockData';
 
 interface CustomHeaderProps {
-  onLogout?: () => void;
+  onLogout: () => void;
+  studentName: string;
 }
 
-const CustomHeader: React.FC<CustomHeaderProps> = ({ onLogout }) => {
-  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+export const CustomHeader: React.FC<CustomHeaderProps> = ({ onLogout, studentName }) => {
   const insets = useSafeAreaInsets();
+  const [showNotifications, setShowNotifications] = useState(false);
+  
+  // Calculate number of unread notifications
+  const unreadCount = mockParentData.notifications.filter(n => !n.read).length;
 
   return (
     <>
       <View style={[styles.container, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
-          <View style={styles.rightButtons}>
-            <TouchableOpacity
+        <View style={styles.content}>
+          <View style={styles.leftSection}>
+            <Text style={styles.greeting}>Welcome,</Text>
+            <Text style={styles.name}>{studentName}</Text>
+          </View>
+          <View style={styles.rightSection}>
+            <TouchableOpacity 
+              onPress={() => setShowNotifications(true)} 
               style={styles.iconButton}
-              onPress={() => setIsNotificationVisible(true)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Ionicons name="notifications-outline" size={22} color="#0a84ff" />
-              <View style={styles.badge} />
+              <Ionicons name="notifications-outline" size={24} color="#007AFF" />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{unreadCount}</Text>
+                </View>
+              )}
             </TouchableOpacity>
-            {onLogout && (
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={onLogout}
-              >
-                <Ionicons name="log-out-outline" size={22} color="#0a84ff" />
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity 
+              onPress={onLogout} 
+              style={styles.iconButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="log-out-outline" size={24} color="#007AFF" />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
+      
       <NotificationPanel
-        isVisible={isNotificationVisible}
-        onClose={() => setIsNotificationVisible(false)}
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
       />
     </>
   );
@@ -45,35 +59,54 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({ onLogout }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#E5E5EA',
+    zIndex: 1,
   },
-  header: {
+  content: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    height: 44, // Standard iOS header height
+    paddingVertical: 12,
   },
-  rightButtons: {
+  leftSection: {
+    flex: 1,
+  },
+  rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+  },
+  greeting: {
+    fontSize: 14,
+    color: '#8E8E93',
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#000000',
   },
   iconButton: {
-    padding: 6,
-    marginLeft: 8,
+    padding: 8,
     position: 'relative',
   },
   badge: {
     position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ff3b30',
+    top: 4,
+    right: 4,
+    backgroundColor: '#FF3B30',
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
   },
-});
-
-export default CustomHeader; 
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+}); 
