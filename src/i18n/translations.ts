@@ -27,6 +27,13 @@ export const translations = {
       bestSubject: 'Best Subject',
       teacher: 'Teacher',
       class: 'Class'
+    },
+    materials: {
+      videoLibrary: 'Lecture Videos',
+      subject: 'Subject',
+      duration: 'Duration',
+      instructor: 'Instructor',
+      watchNow: 'Watch Now'
     }
   },
   zh: {
@@ -57,6 +64,13 @@ export const translations = {
       bestSubject: '最佳科目',
       teacher: '老師',
       class: '班級'
+    },
+    materials: {
+      videoLibrary: '講座視頻',
+      subject: '科目',
+      duration: '時長',
+      instructor: '講師',
+      watchNow: '立即觀看'
     }
   }
 }; 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { translations } from '../i18n/translations';
 
 // Mock data for educational materials
 const mockMaterials = {
@@ -35,8 +36,40 @@ const mockMaterials = {
   ]
 };
 
+// Mock data for video library
+const mockVideos = [
+  {
+    id: '1',
+    title: 'Introduction to Calculus',
+    subject: 'Mathematics',
+    thumbnail: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80',
+    duration: '45:00',
+    instructor: 'Dr. Smith',
+    description: 'Fundamental concepts of calculus and their applications.'
+  },
+  {
+    id: '2',
+    title: 'Physics Laws in Action',
+    subject: 'Science',
+    thumbnail: 'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=800&q=80',
+    duration: '38:15',
+    instructor: 'Prof. Johnson',
+    description: 'Demonstration of key physics laws with real-world examples.'
+  },
+  {
+    id: '3',
+    title: 'English Literature Classics',
+    subject: 'Literature',
+    thumbnail: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=800&q=80',
+    duration: '42:30',
+    instructor: 'Ms. Williams',
+    description: 'Analysis of classic literary works and their themes.'
+  }
+];
+
 const MaterialsScreen = () => {
   const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
+  const t = translations.en.materials; // Use English translations for now
 
   const toggleSubject = (subjectId: string) => {
     setExpandedSubject(expandedSubject === subjectId ? null : subjectId);
@@ -99,6 +132,44 @@ const MaterialsScreen = () => {
           )}
         </View>
       ))}
+      
+      {/* Video Library Section */}
+      <View style={styles.videoSection}>
+        <Text style={styles.videoHeader}>{t.videoLibrary}</Text>
+        {mockVideos.map((video) => (
+          <View key={video.id} style={styles.videoCard}>
+            <Image
+              source={{ uri: video.thumbnail }}
+              style={styles.thumbnail}
+              resizeMode="cover"
+            />
+            <View style={styles.videoInfo}>
+              <Text style={styles.videoTitle}>{video.title}</Text>
+              <View style={styles.videoMeta}>
+                <View style={styles.metaItem}>
+                  <Ionicons name="book-outline" size={16} color="#666" />
+                  <Text style={styles.metaText}>{video.subject}</Text>
+                </View>
+                <View style={styles.metaItem}>
+                  <Ionicons name="time-outline" size={16} color="#666" />
+                  <Text style={styles.metaText}>{video.duration}</Text>
+                </View>
+                <View style={styles.metaItem}>
+                  <Ionicons name="person-outline" size={16} color="#666" />
+                  <Text style={styles.metaText}>{video.instructor}</Text>
+                </View>
+              </View>
+              <Text style={styles.videoDescription} numberOfLines={2}>
+                {video.description}
+              </Text>
+              <TouchableOpacity style={styles.watchButton}>
+                <Text style={styles.watchButtonText}>{t.watchNow}</Text>
+                <Ionicons name="play-circle-outline" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </View>
     </ScrollView>
   );
 };
@@ -166,6 +237,75 @@ const styles = StyleSheet.create({
   materialMeta: {
     fontSize: 14,
     color: '#666',
+  },
+  videoSection: {
+    marginTop: 24,
+  },
+  videoHeader: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#333',
+  },
+  videoCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 16,
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  thumbnail: {
+    width: '100%',
+    height: 200,
+    backgroundColor: '#f0f0f0',
+  },
+  videoInfo: {
+    padding: 16,
+  },
+  videoTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  videoMeta: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  metaText: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 4,
+  },
+  videoDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  watchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4a90e2',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  watchButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
   },
 });
 
