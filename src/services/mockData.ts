@@ -173,25 +173,28 @@ export const mockParentData = {
   notifications: [
     {
       id: '1',
-      type: 'Academic',
-      title: 'Math Test Results Available',
-      date: '2024-03-15',
-      read: false,
+      type: 'academic',
+      title: 'New Assignment Posted',
+      message: 'Math homework due next Monday',
+      time: '2 hours ago',
+      read: false
     },
     {
       id: '2',
-      type: 'Event',
-      title: 'Parent-Teacher Conference Scheduled',
-      date: '2024-03-14',
-      read: true,
+      type: 'behavior',
+      title: 'Behavior Alert',
+      message: 'Late to class 3 times this week',
+      time: '1 day ago',
+      read: true
     },
     {
       id: '3',
-      type: 'Academic',
-      title: 'Science Project Due Date Reminder',
-      date: '2024-03-13',
-      read: false,
-    },
+      type: 'academic',
+      title: 'Test Results Available',
+      message: 'Science test results are now available',
+      time: '2 days ago',
+      read: true
+    }
   ],
   messages: [
     {

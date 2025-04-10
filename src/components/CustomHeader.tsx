@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NotificationPanel } from './NotificationPanel';
@@ -8,52 +8,56 @@ import { mockParentData } from '../services/mockData';
 interface CustomHeaderProps {
   onLogout: () => void;
   studentName: string;
+  showNotifications: boolean;
+  onToggleNotifications: () => void;
 }
 
-export const CustomHeader: React.FC<CustomHeaderProps> = ({ onLogout, studentName }) => {
+export const CustomHeader: React.FC<CustomHeaderProps> = ({ 
+  onLogout, 
+  studentName,
+  showNotifications,
+  onToggleNotifications
+}) => {
   const insets = useSafeAreaInsets();
-  const [showNotifications, setShowNotifications] = useState(false);
   
   // Calculate number of unread notifications
   const unreadCount = mockParentData.notifications.filter(n => !n.read).length;
 
   return (
-    <>
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <View style={styles.content}>
-          <View style={styles.leftSection}>
-            <Text style={styles.greeting}>Welcome,</Text>
-            <Text style={styles.name}>{studentName}</Text>
-          </View>
-          <View style={styles.rightSection}>
-            <TouchableOpacity 
-              onPress={() => setShowNotifications(true)} 
-              style={styles.iconButton}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Ionicons name="notifications-outline" size={24} color="#007AFF" />
-              {unreadCount > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{unreadCount}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={onLogout} 
-              style={styles.iconButton}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Ionicons name="log-out-outline" size={24} color="#007AFF" />
-            </TouchableOpacity>
-          </View>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.content}>
+        <View style={styles.leftSection}>
+          <Text style={styles.greeting}>Welcome,</Text>
+          <Text style={styles.name}>{studentName}</Text>
+        </View>
+        <View style={styles.rightSection}>
+          <TouchableOpacity 
+            onPress={onToggleNotifications} 
+            style={styles.iconButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="notifications-outline" size={24} color="#007AFF" />
+            {unreadCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{unreadCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={onLogout} 
+            style={styles.iconButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="log-out-outline" size={24} color="#007AFF" />
+          </TouchableOpacity>
         </View>
       </View>
       
       <NotificationPanel
         visible={showNotifications}
-        onClose={() => setShowNotifications(false)}
+        onClose={onToggleNotifications}
       />
-    </>
+    </View>
   );
 };
 

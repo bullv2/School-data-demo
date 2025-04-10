@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -29,6 +29,7 @@ type MainTabsScreenProps = {
 };
 
 const MainTabs = ({ navigation, route }: MainTabsScreenProps) => {
+  const [showNotifications, setShowNotifications] = useState(false);
   const handleLogout = () => {
     navigation.replace('Login');
   };
@@ -40,6 +41,8 @@ const MainTabs = ({ navigation, route }: MainTabsScreenProps) => {
       <CustomHeader
         onLogout={handleLogout}
         studentName={mockStudentData.studentInfo.name}
+        showNotifications={showNotifications}
+        onToggleNotifications={() => setShowNotifications(!showNotifications)}
       />
       <Tab.Navigator
         screenOptions={({ route }) => ({
@@ -64,7 +67,13 @@ const MainTabs = ({ navigation, route }: MainTabsScreenProps) => {
             return <Ionicons name={iconName} size={size} color={color} />;
           },
           tabBarActiveTintColor: '#007AFF',
-          tabBarInactiveTintColor: 'gray',
+          tabBarInactiveTintColor: '#8E8E93',
+          tabBarStyle: {
+            backgroundColor: '#FFFFFF',
+            borderTopWidth: 1,
+            borderTopColor: '#E5E5EA',
+            paddingBottom: Platform.OS === 'ios' ? 20 : 0,
+          },
           headerShown: false,
         })}
       >
@@ -96,19 +105,19 @@ const MainTabs = ({ navigation, route }: MainTabsScreenProps) => {
 export default function App() {
   return (
     <SafeAreaProvider>
+      <StatusBar style="auto" />
       <NavigationContainer>
-        <StatusBar style="auto" />
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
+            animation: 'slide_from_right',
+            contentStyle: {
+              backgroundColor: '#F2F2F7',
+            },
           }}
         >
           <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen 
-            name="MainTabs" 
-            component={MainTabs}
-            initialParams={{ studentId: mockStudentData.studentInfo.id }}
-          />
+          <Stack.Screen name="MainTabs" component={MainTabs} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
