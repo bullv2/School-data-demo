@@ -20,7 +20,13 @@ export const translations = {
       academicProgress: 'Academic Progress',
       subjectPerformance: 'Subject Performance',
       attendance: 'Attendance Rate',
-      compare: 'Comparative Analysis'
+      compare: 'Comparative Analysis',
+      subjectVsClass: 'Subject vs Class Average',
+      yourAverage: 'Your Average',
+      classAverage: 'Class Average',
+      bestSubject: 'Best Subject',
+      teacher: 'Teacher',
+      class: 'Class'
     }
   },
   zh: {
@@ -44,7 +50,13 @@ export const translations = {
       academicProgress: '學習進度',
       subjectPerformance: '科目表現',
       attendance: '出席率',
-      compare: '比較分析'
+      compare: '比較分析',
+      subjectVsClass: '科目與班級平均比較',
+      yourAverage: '你的平均',
+      classAverage: '班級平均',
+      bestSubject: '最佳科目',
+      teacher: '老師',
+      class: '班級'
     }
   }
 }; 

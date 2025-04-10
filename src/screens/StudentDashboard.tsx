@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PerformanceChart } from '../components/PerformanceChart';
+import { ExpandableSection } from '../components/ExpandableSection';
 import { mockStudentData } from '../services/mockData';
+import { translations } from '../i18n/translations';
 
 interface SubjectData {
   scores: number[];
@@ -18,11 +20,6 @@ interface Subjects {
   Chinese: SubjectData;
 }
 
-interface ExpandableSectionProps {
-  title: string;
-  children: React.ReactNode;
-}
-
 interface AttendanceData {
   present: number;
   absent: number;
@@ -35,47 +32,9 @@ interface AttendanceData {
   }>;
 }
 
-const ExpandableSection: React.FC<ExpandableSectionProps> = ({ title, children }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [animation] = useState(new Animated.Value(0));
-
-  const toggleExpand = () => {
-    const toValue = expanded ? 0 : 1;
-    Animated.timing(animation, {
-      toValue,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-    setExpanded(!expanded);
-  };
-
-  const contentHeight = animation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 200],
-  });
-
-  return (
-    <View style={styles.expandableSection}>
-      <TouchableOpacity 
-        style={styles.expandableHeader} 
-        onPress={toggleExpand}
-      >
-        <Text style={styles.expandableTitle}>{title}</Text>
-        <Ionicons 
-          name={expanded ? 'chevron-up' : 'chevron-down'} 
-          size={20} 
-          color="#666"
-        />
-      </TouchableOpacity>
-      <Animated.View style={[styles.expandableContent, { maxHeight: contentHeight }]}>
-        {children}
-      </Animated.View>
-    </View>
-  );
-};
-
 const StudentDashboard: React.FC = () => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const t = translations.en.charts; // Use English translations for now
 
   const calculateTrend = (scores: number[]): string => {
     if (scores.length < 2) return 'stable';
@@ -92,13 +51,34 @@ const StudentDashboard: React.FC = () => {
   const subjects = mockStudentData.academicData.subjects as Subjects;
   const subjectEntries = Object.entries(subjects);
 
+  // Calculate scores with proper rounding
+  const studentScores = subjectEntries.map(([_, subject]) => {
+    const avg = calculateSubjectAverage(subject.scores);
+    return Math.round(avg * 10) / 10; // Round to 1 decimal place
+  });
+  const classAverages = subjectEntries.map(([_, subject]) => {
+    const avg = calculateSubjectAverage(subject.classAverage);
+    return Math.round(avg * 10) / 10; // Round to 1 decimal place
+  });
+  
+  // Find min/max values with padding
+  const allValues = [...studentScores, ...classAverages];
+  const minValue = Math.min(...allValues);
+  const maxValue = Math.max(...allValues);
+  
+  // Adjust the range to ensure all values are visible
+  const range = maxValue - minValue;
+  const padding = range * 0.15; // Increase padding to 15%
+  const yAxisMin = Math.max(0, Math.floor(minValue - padding));
+  const yAxisMax = Math.ceil(maxValue + padding);
+
   const subjectPerformanceChartData = {
     labels: Object.keys(subjects),
     datasets: [
       {
-        data: subjectEntries.map(([_, subject]) => calculateSubjectAverage(subject.scores)),
-        color: () => 'rgba(0, 122, 255, 0.8)', // Blue bars for student scores
-        strokeWidth: 0,
+        data: studentScores,
+        color: () => 'rgba(0, 122, 255, 0.8)', // Blue line for student scores
+        strokeWidth: 2,
       }
     ],
   };
@@ -107,7 +87,7 @@ const StudentDashboard: React.FC = () => {
     labels: Object.keys(subjects),
     datasets: [
       {
-        data: subjectEntries.map(([_, subject]) => calculateSubjectAverage(subject.classAverage)),
+        data: classAverages,
         color: () => 'rgba(255, 149, 0, 0.8)', // Orange line for class average
         strokeWidth: 2,
       }
@@ -176,28 +156,35 @@ const StudentDashboard: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Academic Progress</Text>
         <View style={styles.card}>
-          <PerformanceChart
-            type="line"
-            data={subjectPerformanceChartData}
-            title="Subject Performance"
-          />
+          <View style={styles.chartWrapper}>
+            <PerformanceChart
+              type="line"
+              data={subjectPerformanceChartData}
+              title="Your Performance"
+              yAxisMin={yAxisMin}
+              yAxisMax={yAxisMax}
+            />
+          </View>
           <Text style={styles.trend}>
             Your performance is {analysis.trend}
           </Text>
           <ExpandableSection title="Detailed Analysis">
             <View style={styles.analysisContent}>
               <Text style={styles.analysisText}>
-                Your strongest subject is {analysis.bestSubject.name} with an average of {analysis.bestSubject.average}%.
+                Your strongest subject is {analysis.bestSubject.name} with an average of {Math.round(analysis.bestSubject.average * 10) / 10}%.
               </Text>
               <Text style={styles.analysisText}>
-                Focus more attention on {analysis.worstSubject.name} where your average is {analysis.worstSubject.average}%.
+                Focus more attention on {analysis.worstSubject.name} where your average is {Math.round(analysis.worstSubject.average * 10) / 10}%.
               </Text>
               <Text style={styles.recommendationText}>
                 Recommendations:
               </Text>
-              <Text style={styles.bulletPoint}>• Schedule extra practice for {analysis.worstSubject.name}</Text>
-              <Text style={styles.bulletPoint}>• Maintain your strong performance in {analysis.bestSubject.name}</Text>
-              <Text style={styles.bulletPoint}>• Consider joining study groups for challenging subjects</Text>
+              <Text style={styles.bulletPoint}>• Schedule extra practice sessions for {analysis.worstSubject.name}</Text>
+              <Text style={styles.bulletPoint}>• Maintain your strong performance in {analysis.bestSubject.name} through consistent study</Text>
+              <Text style={styles.bulletPoint}>• Join study groups for peer learning and support</Text>
+              <Text style={styles.bulletPoint}>• Review past exam papers to identify areas for improvement</Text>
+              <Text style={styles.bulletPoint}>• Consider seeking additional help from subject teachers</Text>
+              <Text style={styles.bulletPoint}>• Create a structured study timetable</Text>
             </View>
           </ExpandableSection>
         </View>
@@ -207,34 +194,43 @@ const StudentDashboard: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Attendance Overview</Text>
         <View style={styles.card}>
-          <PerformanceChart
-            type="pie"
-            data={attendanceChartData}
-            title="Attendance Distribution"
-          />
-          <Text style={styles.attendanceText}>
-            Present: <Text style={styles.attendanceHighlight}>{mockStudentData.attendance.present}%</Text>
-          </Text>
-          <Text style={styles.attendanceSubtext}>
-            {mockStudentData.attendance.absent} days absent, {mockStudentData.attendance.late} days late
-          </Text>
+          <View style={styles.chartWrapper}>
+            <PerformanceChart
+              type="pie"
+              data={attendanceChartData}
+              title="Attendance Distribution"
+            />
+          </View>
+          <View style={styles.attendanceContainer}>
+            <Text style={styles.attendanceText}>Present:</Text>
+            <Text style={styles.attendanceValue}>{mockStudentData.attendance.present}%</Text>
+            <Text style={styles.attendanceText}>
+              {mockStudentData.attendance.absent} days absent, {mockStudentData.attendance.late} days late
+            </Text>
+          </View>
           <ExpandableSection title="Attendance Analysis">
             <View style={styles.analysisContent}>
               <Text style={styles.analysisText}>
                 Your attendance rate is {
                   mockStudentData.attendance.present >= 95 
-                    ? 'excellent' 
+                    ? 'excellent! Keep up the good work.' 
                     : mockStudentData.attendance.present >= 90 
-                    ? 'good, but could be improved' 
-                    : 'concerning and needs improvement'
+                    ? 'good, but there\'s room for improvement.' 
+                    : 'concerning and requires immediate attention.'
                 }
               </Text>
-              <Text style={styles.recommendationText}>
-                Recommendations:
+              <Text style={styles.analysisText}>
+                Regular attendance is crucial for academic success and maintaining consistent learning progress.
               </Text>
-              <Text style={styles.bulletPoint}>• Aim to arrive 10 minutes before class starts</Text>
+              <Text style={styles.recommendationText}>
+                Recommendations for Improvement:
+              </Text>
+              <Text style={styles.bulletPoint}>• Arrive 10-15 minutes before class starts to prepare</Text>
               <Text style={styles.bulletPoint}>• Plan your morning routine to avoid delays</Text>
-              <Text style={styles.bulletPoint}>• Keep track of your attendance patterns</Text>
+              <Text style={styles.bulletPoint}>• Track your attendance patterns to identify issues</Text>
+              <Text style={styles.bulletPoint}>• Set multiple alarms if needed</Text>
+              <Text style={styles.bulletPoint}>• Prepare school materials the night before</Text>
+              <Text style={styles.bulletPoint}>• Communicate with teachers about any attendance challenges</Text>
             </View>
           </ExpandableSection>
         </View>
@@ -242,54 +238,77 @@ const StudentDashboard: React.FC = () => {
 
       {/* Subject Performance */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Subject Performance</Text>
+        <Text style={styles.sectionTitle}>{t.subjectPerformance}</Text>
         <View style={styles.card}>
-          <Text style={styles.chartTitle}>Subject vs Class Average</Text>
           <View style={styles.chartWrapper}>
             <PerformanceChart
-              type="bar"
-              data={subjectPerformanceChartData}
-            />
-            <PerformanceChart
               type="line"
-              data={classAverageData}
-              overlay={true}
+              data={subjectPerformanceChartData}
+              title={t.subjectVsClass}
+              yAxisMin={yAxisMin}
+              yAxisMax={yAxisMax}
             />
+            <View style={styles.overlayChart}>
+              <PerformanceChart
+                type="line"
+                data={classAverageData}
+                overlay={true}
+                yAxisMin={yAxisMin}
+                yAxisMax={yAxisMax}
+              />
+            </View>
           </View>
           <View style={styles.legend}>
             <View style={styles.legendItem}>
               <View style={[styles.legendColor, { backgroundColor: 'rgba(0, 122, 255, 0.8)' }]} />
-              <Text style={styles.legendText}>Your Average</Text>
+              <Text style={styles.legendText}>{t.yourAverage}</Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendColor, { backgroundColor: 'rgba(255, 149, 0, 0.8)' }]} />
-              <Text style={styles.legendText}>Class Average</Text>
+              <Text style={styles.legendText}>{t.classAverage}</Text>
             </View>
           </View>
           <View style={styles.infoContainer}>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Best Subject:</Text>
+              <Text style={styles.infoLabel}>{t.bestSubject}:</Text>
               <Text style={styles.infoValue}>{analysis.bestSubject.name}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Class:</Text>
+              <Text style={styles.infoLabel}>{t.class}:</Text>
               <Text style={styles.infoValue}>{mockStudentData.studentInfo.class}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Teacher:</Text>
+              <Text style={styles.infoLabel}>{t.teacher}:</Text>
               <Text style={styles.infoValue}>{mockStudentData.academicData.subjects.Mathematics.teacher}</Text>
             </View>
           </View>
           <ExpandableSection title="Performance Insights">
             <View style={styles.analysisContent}>
               <Text style={styles.analysisText}>
-                Your overall performance is {analysis.trend}
+                Your overall performance compared to class average shows {
+                  studentScores.reduce((a, b) => a + b, 0) / studentScores.length >
+                  classAverages.reduce((a, b) => a + b, 0) / classAverages.length
+                    ? 'you are performing above the class average.'
+                    : 'there is room for improvement to reach class average.'
+                }
               </Text>
-              <Text style={styles.subheading}>Key Actions:</Text>
+              <Text style={styles.subheading}>Detailed Analysis:</Text>
+              <Text style={styles.analysisText}>
+                • In {analysis.bestSubject.name}, you are excelling with scores above class average
+              </Text>
+              <Text style={styles.analysisText}>
+                • {analysis.worstSubject.name} requires additional focus to improve performance
+              </Text>
+              <Text style={styles.recommendationText}>
+                Key Actions for Improvement:
+              </Text>
               <View style={styles.actionsList}>
-                <Text style={styles.actionItem}>• Schedule regular review sessions</Text>
-                <Text style={styles.actionItem}>• Participate actively in class discussions</Text>
-                <Text style={styles.actionItem}>• Seek help early when facing difficulties</Text>
+                <Text style={styles.actionItem}>• Schedule regular review sessions for each subject</Text>
+                <Text style={styles.actionItem}>• Actively participate in class discussions and activities</Text>
+                <Text style={styles.actionItem}>• Take detailed notes during lessons</Text>
+                <Text style={styles.actionItem}>• Form study groups with classmates</Text>
+                <Text style={styles.actionItem}>• Complete all homework assignments on time</Text>
+                <Text style={styles.actionItem}>• Seek help from teachers when facing difficulties</Text>
               </View>
             </View>
           </ExpandableSection>
@@ -331,73 +350,132 @@ const StudentDashboard: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#f5f5f5',
   },
   contentContainer: {
-    paddingBottom: 24,
-  },
-  welcomeSection: {
-    padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 4,
-  },
-  nameText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '400',
+    padding: 16,
   },
   section: {
-    marginBottom: 16,
-    paddingHorizontal: 16,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '600',
-    marginBottom: 12,
-    color: '#000',
-    paddingLeft: 4,
+    marginBottom: 16,
+    color: '#000000',
   },
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
-    padding: 12,
-    marginBottom: 16,
+    padding: 16,
+    width: '100%',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    overflow: 'hidden',
+    shadowRadius: 4,
+    elevation: 3,
   },
-  trend: {
-    fontSize: 15,
-    color: '#666',
-    marginTop: 12,
+  chartWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 16,
+    position: 'relative',
+    height: 250,
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: '600',
     marginBottom: 16,
+    color: '#000000',
     textAlign: 'center',
   },
-  attendanceText: {
-    fontSize: 20,
+  legend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+    flexWrap: 'wrap',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 12,
+    marginVertical: 4,
+  },
+  legendColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  legendText: {
+    fontSize: 14,
     color: '#666',
+  },
+  infoContainer: {
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 16,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: '500',
+    flex: 2,
+  },
+  welcomeSection: {
+    marginBottom: 24,
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 4,
+  },
+  nameText: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#000',
+  },
+  expandableSection: {
+    marginTop: 16,
+  },
+  expandableHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  expandableTitle: {
+    fontSize: 16,
+    color: '#666',
+  },
+  expandableContent: {
+    overflow: 'hidden',
+  },
+  attendanceContainer: {
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  attendanceText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 8,
+    textAlign: 'center',
   },
   attendanceHighlight: {
     color: '#34C759',
@@ -427,9 +505,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   analysisText: {
-    fontSize: 15,
-    color: '#48484A',
-    marginBottom: 8,
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 12,
     lineHeight: 20,
   },
   recommendationsTitle: {
@@ -451,137 +529,63 @@ const styles = StyleSheet.create({
   infoGrid: {
     paddingVertical: 8,
   },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  infoLabel: {
-    fontSize: 15,
-    color: '#666666',
-    width: 100,
-    fontWeight: '400',
-  },
-  infoValue: {
-    flex: 1,
-    fontSize: 15,
-    color: '#000000',
-    fontWeight: '500',
-  },
   analysisContent: {
-    paddingTop: 12,
+    padding: 16,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
+    marginBottom: 8,
   },
   recommendationText: {
     fontSize: 15,
     fontWeight: '600',
     color: '#333',
-    marginTop: 8,
+    marginTop: 16,
     marginBottom: 8,
   },
   bulletPoint: {
-    fontSize: 15,
-    color: '#666',
-    marginLeft: 12,
-    marginBottom: 6,
-    lineHeight: 22,
-  },
-  expandableSection: {
-    marginTop: 10,
-  },
-  expandableHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  expandableTitle: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#666',
-  },
-  expandableContent: {
-    overflow: 'hidden',
-  },
-  legend: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 8,
-  },
-  legendColor: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 4,
-  },
-  legendText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  infoContainer: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5EA',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  infoLabel: {
-    fontSize: 15,
-    color: '#666',
-  },
-  infoValue: {
-    fontSize: 15,
-    color: '#000',
-    fontWeight: '500',
-  },
-  analysisContent: {
-    paddingTop: 12,
+    color: '#333',
+    marginBottom: 8,
+    paddingLeft: 8,
+    lineHeight: 20,
   },
   subheading: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: '#000',
-    marginTop: 12,
-    marginBottom: 8,
+    color: '#333',
+    marginTop: 16,
+    marginBottom: 12,
   },
   actionsList: {
     marginTop: 8,
+    paddingBottom: 8,
   },
   actionItem: {
     fontSize: 14,
+    color: '#333',
+    marginBottom: 6,
+    paddingLeft: 8,
+    lineHeight: 18,
+  },
+  overlayChart: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent',
+  },
+  trend: {
+    fontSize: 16,
     color: '#666',
-    marginBottom: 4,
-  },
-  chartTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 16,
     textAlign: 'center',
+    marginVertical: 12,
   },
-  chartWrapper: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: -4,
-    overflow: 'hidden',
-    borderRadius: 16,
-    marginBottom: 16,
-    height: 220, // Fixed height for the chart container
+  attendanceValue: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#4CAF50',
+    marginVertical: 8,
   },
 });
 
